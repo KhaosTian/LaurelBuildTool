@@ -60,31 +60,42 @@ public class LinkScheduler
         var libraries = new List<string>();
         var libraryDirs = new List<string>();
 
-        foreach (var libName in project.LinkedLibraries)
+        // Process Dependencies (other targets)
+        foreach (var depName in project.DistinctDependencies())
         {
-            var libProject = BuildSystem.GetProject(libName);
-            if (libProject != null)
+            var depProject = BuildSystem.GetProject(depName);
+            if (depProject != null)
             {
                 // Internal project dependency - all use the same build directory
                 libraryDirs.Add(outputDir);
 
-                if (libProject.Type == ProjectType.StaticLibrary)
+                if (depProject.Type == ProjectType.StaticLibrary)
                 {
-                    var libFile = Path.Combine(outputDir, libProject.GetOutputFileName(_configuration));
+                    var libFile = Path.Combine(outputDir, depProject.GetOutputFileName(_configuration));
                     if (File.Exists(libFile))
                     {
                         objectFiles.Add(libFile); // Add static library directly to linking
                     }
                 }
-                else
+                else if (depProject.Type == ProjectType.SharedLibrary)
                 {
-                    libraries.Add(libName);
+                    // For shared libraries, add the import library (.lib file on Windows)
+                    var libFile = Path.Combine(outputDir, depProject.GetImportLibraryFileName(_configuration));
+                    if (File.Exists(libFile))
+                    {
+                        objectFiles.Add(libFile);
+                    }
+                    else
+                    {
+                        libraries.Add(depName);
+                    }
                 }
+                // Interface targets don't need linking
             }
             else
             {
-                // External library
-                libraries.Add(libName);
+                // Dependency not found in BuildSystem, treat as external library
+                libraries.Add(depName);
             }
         }
 
@@ -128,6 +139,10 @@ public class LinkScheduler
                 if (!string.IsNullOrEmpty(result.StandardError))
                 {
                     AnsiConsole.MarkupLine($"[red]{EscapeMarkup(result.StandardError)}[/]");
+                }
+                if (!string.IsNullOrEmpty(result.StandardOutput))
+                {
+                    AnsiConsole.MarkupLine($"[red]{EscapeMarkup(result.StandardOutput)}[/]");
                 }
                 return false;
             }

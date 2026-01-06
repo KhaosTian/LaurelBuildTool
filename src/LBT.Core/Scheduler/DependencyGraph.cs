@@ -171,11 +171,16 @@ public class DependencyGraph
 
         foreach (var project in BuildSystem.Projects.Values)
         {
-            foreach (var libName in project.LinkedLibraries)
+            // Use both Dependencies and LinkedLibraries for backward compatibility
+            var allDeps = project.DistinctDependencies()
+                .Union(project.LinkedLibraries)
+                .Distinct();
+
+            foreach (var depName in allDeps)
             {
-                if (BuildSystem.Projects.ContainsKey(libName))
+                if (BuildSystem.Projects.ContainsKey(depName))
                 {
-                    graph.AddDependency(project.Name, libName);
+                    graph.AddDependency(project.Name, depName);
                 }
             }
         }

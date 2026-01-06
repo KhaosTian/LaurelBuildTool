@@ -141,12 +141,12 @@ public class CompileScheduler
             };
 
             // Add exported header directories from dependency projects
-            foreach (var libName in project.LinkedLibraries)
+            foreach (var depName in project.DistinctDependencies())
             {
-                var libProject = BuildSystem.GetProject(libName);
-                if (libProject != null)
+                var depProject = BuildSystem.GetProject(depName);
+                if (depProject != null)
                 {
-                    options.IncludeDirs.AddRange(libProject.ExportIncludeDirs);
+                    options.IncludeDirs.AddRange(depProject.ExportIncludeDirs);
                 }
             }
 

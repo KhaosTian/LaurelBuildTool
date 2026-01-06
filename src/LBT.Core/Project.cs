@@ -18,7 +18,12 @@ public enum ProjectType
     /// <summary>
     /// Shared library (.dll / .so / .dylib).
     /// </summary>
-    SharedLibrary
+    SharedLibrary,
+
+    /// <summary>
+    /// Header-only interface library (no compilation, only headers).
+    /// </summary>
+    Interface
 }
 
 /// <summary>
@@ -48,6 +53,22 @@ public enum BuildConfiguration
 }
 
 /// <summary>
+/// Include directory visibility for dependent projects.
+/// </summary>
+public enum Visibility
+{
+    /// <summary>
+    /// Private - only visible within this target.
+    /// </summary>
+    Private,
+
+    /// <summary>
+    /// Public - visible to dependent targets.
+    /// </summary>
+    Public
+}
+
+/// <summary>
 /// Represents a C++ project.
 /// </summary>
 public class Project
@@ -57,11 +78,13 @@ public class Project
     private readonly List<string> _includeDirs = new();
     private readonly List<string> _exportIncludeDirs = new();
     private readonly List<string> _defines = new();
+    private readonly List<string> _dependencies = new();  // Target dependencies
     private readonly List<string> _linkedLibraries = new();
     private readonly List<string> _systemLibraries = new();
     private readonly List<string> _linkDirs = new();
     private readonly List<string> _compilerFlags = new();
     private readonly List<string> _linkerFlags = new();
+    private readonly List<string> _publicIncludeDirs = new();  // Explicitly public include dirs
     private string? _pchHeader;
 
     /// <summary>
@@ -102,13 +125,50 @@ public class Project
 
     /// <summary>
     /// The exported header directories (for use by other projects that depend on this one).
+    /// Libraries (Static/Shared) auto-export their IncludeDirs.
+    /// Interface targets require explicit ExportIncludeDir().
     /// </summary>
-    public IReadOnlyList<string> ExportIncludeDirs => _exportIncludeDirs;
+    public IReadOnlyList<string> ExportIncludeDirs => GetExportIncludeDirs();
+
+    /// <summary>
+    /// Gets all exported include directories based on project type and visibility.
+    /// Rules:
+    /// - Private IncludeDirs: only visible within this target (default)
+    /// - Public IncludeDirs (via Visibility.Public): exported to dependents
+    /// - Explicit ExportIncludeDir(): exported to dependents
+    /// - Interface type: can only export via ExportIncludeDir()
+    /// </summary>
+    private List<string> GetExportIncludeDirs()
+    {
+        var result = new List<string>();
+
+        // Add explicitly marked public include dirs
+        result.AddRange(_publicIncludeDirs);
+
+        // Add explicitly exported directories (for backward compatibility)
+        result.AddRange(_exportIncludeDirs);
+
+        return result;
+    }
 
     /// <summary>
     /// The preprocessor definitions.
     /// </summary>
     public IReadOnlyList<string> Defines => _defines;
+
+    /// <summary>
+    /// The target dependencies (other targets this one depends on).
+    /// </summary>
+    public IReadOnlyList<string> Dependencies => _dependencies;
+
+    /// <summary>
+    /// Gets all dependencies (explicit Dependencies + LinkedLibraries for backward compatibility).
+    /// </summary>
+    /// <returns>Union of Dependencies and LinkedLibraries.</returns>
+    internal IEnumerable<string> DistinctDependencies()
+    {
+        return _dependencies.Union(_linkedLibraries).Distinct();
+    }
 
     /// <summary>
     /// The linked libraries.
@@ -210,6 +270,7 @@ public class Project
             "binary" => ProjectType.Executable,
             "static" => ProjectType.StaticLibrary,
             "shared" or "sharedlibrary" => ProjectType.SharedLibrary,
+            "interface" or "headeronly" => ProjectType.Interface,
             "exe" or "executable" => ProjectType.Executable,
             _ => throw new ArgumentException($"Unknown project kind: {kind}")
         };
@@ -235,16 +296,33 @@ public class Project
     }
 
     /// <summary>
-    /// Adds header file search directories.
+    /// Adds header file search directories (private by default).
     /// </summary>
     /// <param name="dirs">The include directories.</param>
     /// <returns>This project instance for method chaining.</returns>
     public Project AddIncludeDir(params string[] dirs)
     {
+        return AddIncludeDir(Visibility.Private, dirs);
+    }
+
+    /// <summary>
+    /// Adds header file search directories with visibility control.
+    /// </summary>
+    /// <param name="visibility">The visibility (private or public).</param>
+    /// <param name="dirs">The include directories.</param>
+    /// <returns>This project instance for method chaining.</returns>
+    public Project AddIncludeDir(Visibility visibility, params string[] dirs)
+    {
         foreach (var dir in dirs)
         {
             var fullPath = Path.GetFullPath(Path.Combine(Directory, dir));
             _includeDirs.Add(fullPath);
+
+            // If public, also add to public include dirs
+            if (visibility == Visibility.Public)
+            {
+                _publicIncludeDirs.Add(fullPath);
+            }
         }
         return this;
     }
@@ -276,7 +354,29 @@ public class Project
     }
 
     /// <summary>
-    /// Links libraries.
+    /// Adds target dependencies (similar to xmake's add_deps()).
+    /// Dependencies are used to:
+    /// 1. Determine build order
+    /// 2. Automatically inherit exported header directories
+    /// 3. Link the dependency libraries if they are not interface targets
+    /// </summary>
+    /// <param name="deps">The target names to depend on.</param>
+    /// <returns>This project instance for method chaining.</returns>
+    public Project AddDeps(params string[] deps)
+    {
+        foreach (var dep in deps)
+        {
+            if (!string.IsNullOrEmpty(dep))
+            {
+                _dependencies.Add(dep);
+            }
+        }
+        return this;
+    }
+
+    /// <summary>
+    /// Links libraries (for external or pre-built libraries).
+    /// For target dependencies, use AddDeps() instead.
     /// </summary>
     /// <param name="libraries">The libraries to link.</param>
     /// <returns>This project instance for method chaining.</returns>
@@ -433,7 +533,24 @@ public class Project
                     ? $"lib{Name}{suffix}.dylib"
                     : $"lib{Name}{suffix}.so",
 
+            ProjectType.Interface => "",  // Header-only libraries have no output file
+
             _ => Name
         };
+    }
+
+    /// <summary>
+    /// Gets the import library file name for shared libraries on Windows.
+    /// </summary>
+    /// <param name="config">The build configuration.</param>
+    /// <returns>The import library file name, or the output file name for non-shared libraries.</returns>
+    public string GetImportLibraryFileName(BuildConfiguration config = BuildConfiguration.Debug)
+    {
+        if (Type == ProjectType.SharedLibrary && OperatingSystem.IsWindows())
+        {
+            var suffix = config == BuildConfiguration.Debug ? "_d" : "";
+            return $"{Name}{suffix}.lib";
+        }
+        return GetOutputFileName(config);
     }
 }
