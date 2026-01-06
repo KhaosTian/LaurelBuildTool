@@ -142,6 +142,15 @@ public class BuildEngine
         // Build each project in order
         foreach (var project in buildOrder)
         {
+            // Skip interface targets (header-only libraries)
+            if (project.Type == ProjectType.Interface)
+            {
+                AnsiConsole.MarkupLine($"[bold]═══ {project.Name} ═══[/]");
+                AnsiConsole.MarkupLine("[dim]Header-only library (no compilation needed)[/]");
+                AnsiConsole.WriteLine();
+                continue;
+            }
+
             AnsiConsole.MarkupLine($"[bold]═══ {project.Name} ═══[/]");
             AnsiConsole.WriteLine();
 
