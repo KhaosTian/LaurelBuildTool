@@ -37,25 +37,24 @@ dotnet --list-runtimes | grep "9.0"
 - Linux: See [.NET documentation](https://dotnet.microsoft.com/download/dotnet/9.0)
 - macOS: `brew install dotnet-runtime`
 
-### Quick Install
+## Quick Start
+
+### 1. Install LBT
 
 ```bash
-# Clone repository
-git clone https://github.com/KhaosTian/LaurelBuildTool.git
-cd LaurelBuildTool
+# Install as .NET global tool (recommended)
+dotnet tool install --global LBT
 
-# Build
-dotnet build src/LBT.Cli/LBT.Cli.csproj -c Release
-
-# Run
-dotnet run --project src/LBT.Cli/LBT.Cli.csproj -- build
+# Verify installation
+lbt --version
+lbt --help
 ```
 
-### Your First Project
+### 2. Create Your First Project
 
 Create `build.cs`:
 ```csharp
-SetProject("MyProject");
+SetName("MyProject");
 SetVersion("1.0.0");
 SetLanguages("c++17");
 
@@ -76,6 +75,7 @@ int main() {
 
 Build and run:
 ```bash
+# From your project directory (containing build.cs)
 lbt build
 lbt run
 ```
@@ -103,6 +103,18 @@ lbt clean              # Clean build artifacts
 lbt -h, --help         # Show help
 ```
 
+## Build from Source
+
+```bash
+git clone https://github.com/KhaosTian/LaurelBuildTool.git
+cd LaurelBuildTool
+dotnet build src/LBT.Cli/LBT.Cli.csproj -c Release
+
+# Add to PATH (optional)
+# Windows: setx PATH "%PATH%;%CD%\build\bin\LBT.Cli\Release\net9.0\win-x64"
+# Linux/macOS: export PATH="$PATH:$(pwd)/build/bin/LBT.Cli/Release/net9.0/win-x64"
+```
+
 ## Multi-Module Projects
 
 ```csharp
@@ -110,16 +122,14 @@ lbt -h, --help         # Show help
 Target("mathlib")
     .SetKind("static")
     .AddFiles("math.cpp")
-    .AddIncludeDir("include")
-    .ExportIncludeDir("include");
+    .AddIncludeDir(Visibility.Public, "include");  // Export headers
 
 // Root build.cs
 Include("lib");  // Include sub-module
 
 Target("main")
     .AddFiles("src/*.cpp")
-    .AddIncludeDir("lib/include")
-    .AddLinks("mathlib");  // Link library
+    .AddDeps("mathlib");  // Auto-inherits include dirs and links
 ```
 
 ## 📚 Documentation
@@ -274,7 +284,7 @@ dotnet build
 dotnet test
 
 # Build and run locally
-dotnet run --project src/LaurelBuildTool.Cli -- build
+dotnet run --project src/LBT.Cli/LBT.Cli.csproj -- build
 ```
 
 ## 📝 License

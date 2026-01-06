@@ -7,6 +7,21 @@
     <!-- Output assembly name -->
     <AssemblyName>lbt</AssemblyName>
 
+    <!-- .NET Tool configuration -->
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>lbt</ToolCommandName>
+    <Version>1.0.1</Version>
+    <Authors>Khaos Tian</Authors>
+    <Description>Modern C/C++ build system powered by C# and .NET 9</Description>
+    <PackageTags>build;cpp;c++;c;build-system</PackageTags>
+    <PackageProjectUrl>https://github.com/KhaosTian/LaurelBuildTool</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/KhaosTian/LaurelBuildTool</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <License>MIT</License>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/KhaosTian/LaurelBuildTool/releases</PackageReleaseNotes>
+
     <!-- NativeAOT, SingleFile, and Trimming disabled due to Roslyn incompatibility -->
     <!-- Roslyn requires:
          1. Runtime compilation (incompatible with NativeAOT)
@@ -18,7 +33,7 @@
 
     <!-- ReadyToRun: Pre-compile to native code while keeping IL compatibility -->
     <!-- This provides NativeAOT-like startup performance without breaking Roslyn -->
-    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRun Condition=" '$(RuntimeIdentifier)' != '' ">true</PublishReadyToRun>
 
     <!-- Framework-dependent deployment (requires .NET 9.0 Runtime) -->
     <SelfContained>false</SelfContained>
@@ -26,16 +41,18 @@
     <!-- Globalization for smaller size -->
     <InvariantGlobalization>true</InvariantGlobalization>
 
-    <!-- Runtime identifier - Only for Release builds -->
-    <RuntimeIdentifier Condition=" '$(Configuration)' == 'Release' ">win-x64</RuntimeIdentifier>
-
     <!-- Culture list - Only include English (saves ~4 MB) -->
-    <SatelliteResourceLanguages Condition=" '$(Configuration)' == 'Release' ">en</SatelliteResourceLanguages>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>
     <!-- Core library -->
     <ProjectReference Include="..\LBT.Core\LBT.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Include README in NuGet package -->
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -37,25 +37,24 @@ dotnet --list-runtimes | grep "9.0"
 - Linux: 参见 [.NET 文档](https://dotnet.microsoft.com/download/dotnet/9.0)
 - macOS: `brew install dotnet-runtime`
 
-### 快速安装
+## 快速开始
+
+### 1. 安装 LBT
 
 ```bash
-# 克隆仓库
-git clone https://github.com/KhaosTian/LaurelBuildTool.git
-cd LaurelBuildTool
+# 作为 .NET 全局工具安装（推荐）
+dotnet tool install --global LBT
 
-# 构建
-dotnet build src/LBT.Cli/LBT.Cli.csproj -c Release
-
-# 运行
-dotnet run --project src/LBT.Cli/LBT.Cli.csproj -- build
+# 验证安装
+lbt --version
+lbt --help
 ```
 
-### 创建你的第一个项目
+### 2. 创建你的第一个项目
 
 创建 `build.cs`：
 ```csharp
-SetProject("MyProject");
+SetName("MyProject");
 SetVersion("1.0.0");
 SetLanguages("c++17");
 
@@ -76,6 +75,7 @@ int main() {
 
 构建和运行：
 ```bash
+# 在你的项目目录中（包含 build.cs 的目录）
 lbt build
 lbt run
 ```
@@ -103,6 +103,18 @@ lbt clean              # 清理构建产物
 lbt -h, --help         # 显示帮助
 ```
 
+## 从源码构建
+
+```bash
+git clone https://github.com/KhaosTian/LaurelBuildTool.git
+cd LaurelBuildTool
+dotnet build src/LBT.Cli/LBT.Cli.csproj -c Release
+
+# 添加到 PATH（可选）
+# Windows: setx PATH "%PATH%;%CD%\build\bin\LBT.Cli\Release\net9.0\win-x64"
+# Linux/macOS: export PATH="$PATH:$(pwd)/build/bin/LBT.Cli/Release/net9.0/win-x64"
+```
+
 ## 多模块项目
 
 ```csharp
@@ -110,16 +122,14 @@ lbt -h, --help         # 显示帮助
 Target("mathlib")
     .SetKind("static")
     .AddFiles("math.cpp")
-    .AddIncludeDir("include")
-    .ExportIncludeDir("include");
+    .AddIncludeDir(Visibility.Public, "include");  // 导出头文件
 
 // 根目录 build.cs
 Include("lib");  // 包含子模块
 
 Target("main")
     .AddFiles("src/*.cpp")
-    .AddIncludeDir("lib/include")
-    .AddLinks("mathlib");  // 链接库
+    .AddDeps("mathlib");  // 自动继承头文件目录并链接库
 ```
 
 ## 📚 文档
@@ -274,7 +284,7 @@ dotnet build
 dotnet test
 
 # 本地构建和运行
-dotnet run --project src/LaurelBuildTool.Cli -- build
+dotnet run --project src/LBT.Cli/LBT.Cli.csproj -- build
 ```
 
 ## 📝 许可证
