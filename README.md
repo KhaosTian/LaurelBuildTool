@@ -2,6 +2,8 @@
 
 > A modern C/C++ build system powered by C# and .NET 9
 
+English | [简体中文](README.zh.md)
+
 **LaurelBuildTool** is a next-generation build system designed for C/C++ projects. It combines the power of C# scripting with the speed of native compilation, providing a clean, intuitive API similar to xmake but with modern tooling.
 
 ## ✨ Features
