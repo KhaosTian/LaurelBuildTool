@@ -216,6 +216,8 @@ public partial class MsvcToolchain : Toolchain
         if (options.GenerateDependencies)
         {
             args.Add("/showIncludes");
+            // Force English output for consistent parsing
+            args.Add("/English-");
         }
 
         // Output file

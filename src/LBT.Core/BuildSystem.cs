@@ -153,6 +153,12 @@ public static class BuildSystem
     public const ProjectType StaticLibrary = ProjectType.StaticLibrary;
     /// <summary>Shared library</summary>
     public const ProjectType SharedLibrary = ProjectType.SharedLibrary;
+    /// <summary>Header-only interface library</summary>
+    public const ProjectType Interface = ProjectType.Interface;
+    /// <summary>Private visibility</summary>
+    public const Visibility Private = Visibility.Private;
+    /// <summary>Public visibility</summary>
+    public const Visibility Public = Visibility.Public;
 
     /// <summary>Debug build rule</summary>
     public const BuildRule ModeDebug = BuildRule.ModeDebug;
@@ -223,10 +229,10 @@ public static class BuildSystem
     #region Global setting methods (similar to xmake's set_xxx)
 
     /// <summary>
-    /// Sets the project name.
+    /// Sets the project/solution name.
     /// </summary>
     /// <param name="name">The project name.</param>
-    public static void SetProject(string name)
+    public static void SetName(string name)
     {
         _projectName = name;
     }

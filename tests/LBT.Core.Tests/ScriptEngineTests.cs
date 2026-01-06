@@ -25,7 +25,7 @@ public class ScriptEngineTests : IDisposable
         File.WriteAllText(buildCs, """
             using LBT;
 
-            SetProject("TestProject");
+            SetName("TestProject");
             SetVersion("1.0.0");
             SetLanguages("c++17");
 
@@ -53,7 +53,7 @@ public class ScriptEngineTests : IDisposable
         File.WriteAllText(buildCs, """
             using LBT;
 
-            SetProject("MainProject");
+            SetName("MainProject");
             Include("submodule");
             """);
 
