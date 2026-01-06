@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+
+    <!-- Output assembly name -->
+    <AssemblyName>lbt</AssemblyName>
+
+    <!-- NativeAOT, SingleFile, and Trimming disabled due to Roslyn incompatibility -->
+    <!-- Roslyn requires:
+         1. Runtime compilation (incompatible with NativeAOT)
+         2. Assembly file locations (incompatible with SingleFile)
+         3. Full metadata (incompatible with Trimming) -->
+    <PublishAot>false</PublishAot>
+    <PublishSingleFile>false</PublishSingleFile>
+    <PublishTrimmed>false</PublishTrimmed>
+
+    <!-- ReadyToRun: Pre-compile to native code while keeping IL compatibility -->
+    <!-- This provides NativeAOT-like startup performance without breaking Roslyn -->
+    <PublishReadyToRun>true</PublishReadyToRun>
+
+    <!-- Framework-dependent deployment (requires .NET 9.0 Runtime) -->
+    <SelfContained>false</SelfContained>
+
+    <!-- Globalization for smaller size -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+
+    <!-- Runtime identifier - Only for Release builds -->
+    <RuntimeIdentifier Condition=" '$(Configuration)' == 'Release' ">win-x64</RuntimeIdentifier>
+
+    <!-- Culture list - Only include English (saves ~4 MB) -->
+    <SatelliteResourceLanguages Condition=" '$(Configuration)' == 'Release' ">en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Core library -->
+    <ProjectReference Include="..\LBT.Core\LBT.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- CLI command line parsing -->
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+
+    <!-- Terminal UI -->
+    <PackageReference Include="Spectre.Console" Version="0.49.1" />
+  </ItemGroup>
+
+</Project>

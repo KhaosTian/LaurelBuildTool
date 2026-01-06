@@ -1,0 +1,39 @@
+<Project>
+  <PropertyGroup>
+    <!-- Output directory -->
+    <BaseOutputPath>$(MSBuildThisFileDirectory)build\bin\$(MSBuildProjectName)\</BaseOutputPath>
+    <OutputPath>$(BaseOutputPath)$(Configuration)\</OutputPath>
+    
+    <!-- Intermediate directory -->
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)build\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)\</IntermediateOutputPath>
+    
+    <!-- NuGet package output -->
+    <PackageOutputPath>$(MSBuildThisFileDirectory)build\packages\</PackageOutputPath>
+    
+    <!-- Publish directory -->
+    <PublishDir>$(MSBuildThisFileDirectory)build\publish\$(MSBuildProjectName)\$(Configuration)\</PublishDir>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <!-- Common settings -->
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    
+    <!-- Deterministic build -->
+    <Deterministic>true</Deterministic>
+    
+    <!-- Version information -->
+    <Version>0.1.0</Version>
+    <Authors>KhaosTian</Authors>
+    <Company>LaurelBuildTool</Company>
+    <Copyright>Copyright © 2026 KhaosTian</Copyright>
+
+    <!-- Repository information -->
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/KhaosTian/LaurelBuildTool</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/KhaosTian/LaurelBuildTool</PackageProjectUrl>
+    <RepositoryBranch>main</RepositoryBranch>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,24 @@
+# LBT build outputs
+bin/
+obj/
+build/
+.lbt/
+
+# IDE
+.vs/
+.vscode/
+.claude/
+*.user
+*.suo
+
+# Test results
+TestResults/
+coverage/
+
+# NuGet
+*.nupkg
+packages/
+
+# System files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+
+    <!-- NuGet package information -->
+    <PackageId>LBT.Core</PackageId>
+    <Description>Modern C++ build system powered by C# - Core Library</Description>
+    <PackageTags>build;cpp;cmake;xmake;native</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+    <!-- Documentation generation -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- CLI command line parsing -->
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+
+    <!-- Terminal UI / Colored output / Progress bar -->
+    <PackageReference Include="Spectre.Console" Version="0.49.1" />
+
+    <!-- External process management (invoke compilers) -->
+    <PackageReference Include="CliWrap" Version="3.6.6" />
+
+    <!-- File glob matching -->
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="9.0.0" />
+
+    <!-- Cache database -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+
+    <!-- Script engine (core!) -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.11.0" />
+  </ItemGroup>
+
+</Project>
