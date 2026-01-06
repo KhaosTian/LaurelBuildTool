@@ -1,5 +1,5 @@
 // Multi-module example
-SetProject("MultiModule");
+SetName("MultiModule");
 SetVersion("1.0.0");
 SetLanguages("c++17");
 
@@ -9,5 +9,4 @@ Include("src/mathlib");
 // Create main executable that links mathlib
 Target("main")
     .AddFiles("src/main.cpp")
-    .AddIncludeDir("src/mathlib/include")
-    .Link("mathlib");
+    .AddDeps("mathlib");  // Automatically gets include dirs and links library

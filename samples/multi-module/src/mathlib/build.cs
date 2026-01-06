@@ -2,5 +2,4 @@
 Target("mathlib")
     .SetKind("static")
     .AddFiles("math.cpp")
-    .AddIncludeDir("include")
-    .ExportIncludeDir("include");
+    .AddIncludeDir(Visibility.Public, "include");  // Public for dependent projects

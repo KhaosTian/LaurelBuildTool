@@ -1,5 +1,5 @@
 // Simple hello-world example
-SetProject("HelloWorld");
+SetName("HelloWorld");
 SetVersion("1.0.0");
 SetLanguages("c++17");
 
